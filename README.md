@@ -25,7 +25,8 @@ brew install ffmpeg
 在项目根目录执行：
 
 ```bash
-cd /Users/ming.ma/Downloads/recording
+# 进入项目根目录
+cd your-project-directory
 
 # 1) Node 依赖
 npm install
@@ -89,7 +90,8 @@ set -a && source .env && set +a
 说明服务使用的 Python 环境没有安装依赖。按下面修复：
 
 ```bash
-cd /Users/ming.ma/Downloads/recording
+# 进入项目根目录
+cd your-project-directory
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 python -c "import mlx_whisper, senko; print('ok')"
