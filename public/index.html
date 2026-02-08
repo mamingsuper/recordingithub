@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音频转录 - Audio Transcription</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-waveform-path"></i>
+                <h1>音频转录系统</h1>
+            </div>
+            <p class="subtitle">MLX-Whisper + Senko 极速说话人分离 ⚡</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="upload-section glass-card">
+                <h2><i class="fas fa-upload"></i> 选择音频文件</h2>
+
+                <div class="dropzone" id="dropzone">
+                    <div class="dropzone-content">
+                        <i class="fas fa-cloud-arrow-up dropzone-icon"></i>
+                        <p class="dropzone-text">拖放音频文件到这里</p>
+                        <p class="dropzone-hint">或点击选择文件</p>
+                        <input type="file" id="fileInput" accept="audio/*,.wav,.mp3,.m4a,.webm,.ogg,.flac" hidden>
+                    </div>
+                </div>
+
+                <div class="file-info hidden" id="fileInfo">
+                    <i class="fas fa-file-audio file-icon"></i>
+                    <div class="file-details">
+                        <span class="file-name" id="fileName"></span>
+                        <span class="file-size" id="fileSize"></span>
+                    </div>
+                    <button class="btn-icon" id="removeFile" title="移除文件">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Options Section -->
+            <section class="options-section glass-card">
+                <h2><i class="fas fa-sliders"></i> 转录设置</h2>
+
+                <div class="options-grid">
+                    <div class="option-group">
+                        <label for="language">语言</label>
+                        <select id="language">
+                            <option value="">自动检测</option>
+                            <option value="de">德语 (German)</option>
+                            <option value="en">英语 (English)</option>
+                            <option value="zh">中文 (Chinese)</option>
+                            <option value="fr">法语 (French)</option>
+                            <option value="es">西班牙语 (Spanish)</option>
+                            <option value="ja">日语 (Japanese)</option>
+                            <option value="ko">韩语 (Korean)</option>
+                        </select>
+                    </div>
+
+                    <div class="option-group">
+                        <label for="modelSize">模型大小</label>
+                        <select id="modelSize">
+                            <option value="small">Small (快速)</option>
+                            <option value="medium">Medium (平衡)</option>
+                            <option value="distil-large-v3" selected>Distil-Large-v3 (快速⚡)</option>
+                            <option value="large-v3">Large-v3 (精确)</option>
+                        </select>
+                        <p class="option-hint">大文件建议用 Small</p>
+                    </div>
+
+                    <div class="option-group">
+                        <label for="outputFormat">输出格式</label>
+                        <select id="outputFormat">
+                            <option value="json">JSON</option>
+                            <option value="txt">TXT (纯文本)</option>
+                            <option value="markdown">Markdown</option>
+                        </select>
+                    </div>
+
+                    <div class="option-group toggle-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="enableDiarization" checked>
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-text">说话人分离</span>
+                        </label>
+                        <p class="option-hint">区分不同说话人</p>
+                    </div>
+                </div>
+
+                <button class="btn-primary btn-transcribe" id="transcribeBtn" disabled>
+                    <i class="fas fa-microphone"></i>
+                    <span>开始转录</span>
+                </button>
+            </section>
+
+            <!-- Progress Section -->
+            <section class="progress-section glass-card hidden" id="progressSection">
+                <div class="progress-header">
+                    <div class="spinner"></div>
+                    <h2>正在转录...</h2>
+                    <div class="timer" id="timerDisplay">00:00</div>
+                </div>
+                <p class="progress-text" id="progressText">正在加载模型，请稍候...</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <button id="stopBtn" class="btn-danger hidden">
+                    <i class="fas fa-stop-circle"></i> 停止并保存
+                </button>
+                <p class="progress-hint">使用 GPU 加速处理中</p>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section glass-card hidden" id="resultsSection">
+                <div class="results-header">
+                    <h2><i class="fas fa-check-circle"></i> 转录完成</h2>
+                    <div class="results-actions">
+                        <button class="btn-secondary" id="copyBtn">
+                            <i class="fas fa-copy"></i> 复制
+                        </button>
+                        <button class="btn-secondary" id="downloadBtn">
+                            <i class="fas fa-download"></i> 下载
+                        </button>
+                    </div>
+                </div>
+
+                <div class="results-meta" id="resultsMeta">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div class="speakers-summary hidden" id="speakersSummary">
+                    <h3><i class="fas fa-users"></i> 说话人</h3>
+                    <div class="speakers-list" id="speakersList"></div>
+                </div>
+
+                <div class="transcription-output" id="transcriptionOutput">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Error Section -->
+            <section class="error-section glass-card hidden" id="errorSection">
+                <div class="error-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h2>转录失败</h2>
+                <p class="error-message" id="errorMessage"></p>
+                <button class="btn-primary" id="retryBtn">
+                    <i class="fas fa-redo"></i> 重试
+                </button>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by MLX-Whisper Large-v3 & Senko (CoreML)</p>
+        </footer>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>

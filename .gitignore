@@ -1,0 +1,39 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+
+# Runtime data
+data/uploads/*
+data/transcriptions/*
+!data/uploads/.gitkeep
+!data/transcriptions/.gitkeep
+
+# Model/cache artifacts
+.cache/
+mlx_models/
+
+# Local env
+.env
+.env.local
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Local media files
+*.m4a
+*.mp3
+*.wav
+*.webm
+*.ogg
+*.flac
